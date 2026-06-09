@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weight Status Prediction</title>
+  <style>
+    :root{
+      --bg1:#0f172a;
+      --bg2:#111827;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --line:#e2e8f0;
+      --primary:#4f46e5;
+      --primary2:#06b6d4;
+      --soft:#eef2ff;
+      --shadow: 0 20px 60px rgba(15, 23, 42, .18);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(79,70,229,.22), transparent 32%),
+        radial-gradient(circle at top right, rgba(6,182,212,.16), transparent 28%),
+        linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+      min-height: 100vh;
+      padding: 32px 16px;
+    }
+
+    .wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      letter-spacing: -0.03em;
+    }
+
+    .hero p {
+      margin: 12px auto 0;
+      max-width: 760px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .card {
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(226,232,240,.85);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+    }
+
+    .toggle {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .toggle button {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .toggle button.active {
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .section-title {
+      margin: 18px 0 10px;
+      font-size: 1.05rem;
+      color: #111827;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: .92rem;
+      margin-top: 6px;
+      line-height: 1.45;
+    }
+
+    form {
+      display: grid;
+      gap: 18px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-weight: 700;
+      font-size: .95rem;
+    }
+
+    input, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 1rem;
+      background: #fff;
+      outline: none;
+      transition: .18s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: rgba(79,70,229,.65);
+      box-shadow: 0 0 0 4px rgba(79,70,229,.12);
+    }
+
+    .small {
+      font-size: .86rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .advanced {
+      display: none;
+      margin-top: 6px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #f8fafc;
+    }
+
+    .advanced.show {
+      display: block;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .info-card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .info-card h4 {
+      margin: 0 0 8px;
+    }
+
+    .bmi-box {
+      display: grid;
+      gap: 10px;
+      padding: 16px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #eef2ff, #ecfeff);
+      border: 1px solid rgba(79,70,229,.12);
+    }
+
+    .bmi-value {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: .2s ease;
+    }
+
+    .btn-primary {
+      color: white;
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      box-shadow: 0 12px 24px rgba(79,70,229,.22);
+    }
+
+    .btn-secondary {
+      background: #fff;
+      border: 1px solid var(--line);
+      color: var(--text);
+    }
+
+    .result {
+      margin-top: 20px;
+      padding: 18px;
+      border-radius: 18px;
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: var(--soft);
+      font-weight: 700;
+      margin-right: 8px;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 760px) {
+      .grid, .info-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <h1>Weight Status Prediction</h1>
+      <p>
+        Predict body weight status from a small set of user-friendly inputs.
+        Basic mode is for quick checks. Advanced mode shows a clearer explanation of the model and BMI.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="toggle">
+        <button type="button" id="basicBtn" class="active" onclick="showMode('basic')">Basic Mode</button>
+        <button type="button" id="advancedBtn" onclick="showMode('advanced')">Advanced Mode</button>
+      </div>
+
+      <form action="/predict" method="post" id="predictForm">
+        <h3 class="section-title">Basic Information</h3>
+        <div class="grid">
+          <div class="field">
+            <label>Age</label>
+            <input type="number" name="age" min="0" required value="{{ form.get('age', '') }}" />
+            <div class="small">Age in years.</div>
+          </div>
+
+          <div class="field">
+            <label>Gender</label>
+            <select name="gender" required>
+              <option value="Male" {% if form.get('gender') == 'Male' %}selected{% endif %}>Male</option>
+              <option value="Female" {% if form.get('gender') == 'Female' %}selected{% endif %}>Female</option>
+              <option value="Other" {% if form.get('gender') == 'Other' %}selected{% endif %}>Other</option>
+            </select>
+            <div class="small">Choose the category used in the model.</div>
+          </div>
+
+          <div class="field">
+            <label>Height (cm)</label>
+            <input type="number" id="height_cm" name="height_cm" step="0.1" min="1" required
+                   value="{{ form.get('height_cm', '') }}" oninput="updateBMI()" />
+            <div class="small">Example: 170 for 170 cm.</div>
+          </div>
+
+          <div class="field">
+            <label>Weight (kg)</label>
+            <input type="number" id="weight_kg" name="weight_kg" step="0.1" min="1" required
+                   value="{{ form.get('weight_kg', '') }}" oninput="updateBMI()" />
+            <div class="small">Example: 65 for 65 kg.</div>
+          </div>
+
+          <div class="field">
+            <label>Activity Level</label>
+            <select name="activity_level" required>
+              <option value="Sedentary" {% if form.get('activity_level') == 'Sedentary' %}selected{% endif %}>Sedentary</option>
+              <option value="Lightly Active" {% if form.get('activity_level') == 'Lightly Active' %}selected{% endif %}>Lightly Active</option>
+              <option value="Moderately Active" {% if form.get('activity_level') == 'Moderately Active' %}selected{% endif %}>Moderately Active</option>
+              <option value="Very Active" {% if form.get('activity_level') == 'Very Active' %}selected{% endif %}>Very Active</option>
+              <option value="Athlete" {% if form.get('activity_level') == 'Athlete' %}selected{% endif %}>Athlete</option>
+            </select>
+            <div class="small">Choose how active the user is in daily life.</div>
+          </div>
+
+          <div class="field">
+            <label>BMI (auto-calculated)</label>
+            <input type="text" id="bmi_display" readonly />
+            <div class="small">BMI is calculated automatically from height and weight.</div>
+          </div>
+        </div>
+
+        <div class="advanced" id="advancedPanel">
+          <h3 class="section-title">Advanced Guide</h3>
+          <p class="hint">
+            The retrained model now uses a smaller, easier set of inputs.
+            This panel explains how the prediction works and how BMI is interpreted.
+          </p>
+
+          <div class="info-grid">
+            <div class="info-card">
+              <h4>What the model uses</h4>
+              <p class="small">
+                Age, gender, height, weight, BMI, and activity level.
+              </p>
+            </div>
+
+            <div class="info-card">
+              <h4>BMI categories</h4>
+              <p class="small">
+                Underweight: &lt; 18.5<br>
+                Healthy: 18.5 - 24.9<br>
+                Overweight: 25 - 29.9<br>
+                Obese: 30+
+              </p>
+            </div>
+          </div>
+
+          <div class="bmi-box" style="margin-top: 16px;">
+            <div class="small">Live BMI preview</div>
+            <div class="bmi-value" id="bmiCategoryText">-</div>
+            <div class="small" id="bmiDetailText">Enter height and weight to see the BMI category.</div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" type="submit">Predict</button>
+          <button class="btn btn-secondary" type="button" onclick="clearForm()">Reset</button>
+        </div>
+      </form>
+
+      {% if result %}
+      <div class="result">
+        <h2>Prediction Result: {{ result }}</h2>
+        {% if bmi is not none %}
+          <p><strong>BMI:</strong> {{ bmi }} ({{ bmi_category }})</p>
+        {% endif %}
+        {% if probabilities %}
+          <div>
+            <strong>Probabilities</strong><br />
+            {% for label, prob in probabilities.items() %}
+              <span class="pill">{{ label }}: {{ "%.4f"|format(prob) }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    const advancedPanel = document.getElementById("advancedPanel");
+    const basicBtn = document.getElementById("basicBtn");
+    const advancedBtn = document.getElementById("advancedBtn");
+    const bmiDisplay = document.getElementById("bmi_display");
+    const bmiCategoryText = document.getElementById("bmiCategoryText");
+    const bmiDetailText = document.getElementById("bmiDetailText");
+
+    function showMode(mode) {
+      if (mode === "basic") {
+        advancedPanel.classList.remove("show");
+        basicBtn.classList.add("active");
+        advancedBtn.classList.remove("active");
+      } else {
+        advancedPanel.classList.add("show");
+        advancedBtn.classList.add("active");
+        basicBtn.classList.remove("active");
+      }
+    }
+
+    function updateBMI() {
+      const heightCm = parseFloat(document.getElementById("height_cm").value);
+      const weightKg = parseFloat(document.getElementById("weight_kg").value);
+
+      if (!heightCm || !weightKg || heightCm <= 0) {
+        bmiDisplay.value = "";
+        bmiCategoryText.textContent = "-";
+        bmiDetailText.textContent = "Enter height and weight to see the BMI category.";
+        return;
+      }
+
+      const heightM = heightCm / 100;
+      const bmi = weightKg / (heightM * heightM);
+      const bmiFixed = bmi.toFixed(2);
+
+      bmiDisplay.value = bmiFixed;
+
+      let category = "";
+      if (bmi < 18.5) category = "Underweight";
+      else if (bmi < 25) category = "Healthy";
+      else if (bmi < 30) category = "Overweight";
+      else category = "Obese";
+
+      bmiCategoryText.textContent = `${bmiFixed} → ${category}`;
+      bmiDetailText.textContent = "This preview matches the BMI used by the model.";
+    }
+
+    function clearForm() {
+      document.getElementById("predictForm").reset();
+      bmiDisplay.value = "";
+      bmiCategoryText.textContent = "-";
+      bmiDetailText.textContent = "Enter height and weight to see the BMI category.";
+      showMode("basic");
+    }
+
+    showMode("basic");
+  </script>
+</body>
+</html>
